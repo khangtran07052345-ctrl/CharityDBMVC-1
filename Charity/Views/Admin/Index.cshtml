@@ -1,0 +1,58 @@
+﻿@using System.Linq
+@using Charity.Models
+@{
+    ViewBag.Title = "Quản trị hệ thống";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var campaigns = ViewBag.Campaigns as IEnumerable<CampaignViewModel> ?? Enumerable.Empty<CampaignViewModel>();
+    decimal totalAmount = ViewBag.TotalAmount == null ? 0m : (decimal)ViewBag.TotalAmount;
+    decimal totalTarget = ViewBag.TotalTarget == null ? 0m : (decimal)ViewBag.TotalTarget;
+    int overallProgress = totalTarget <= 0 ? 0 : (int)Math.Min(100m, Math.Round(totalAmount / totalTarget * 100m));
+}
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+        <div>
+            <h2 class="mb-1">Bảng điều khiển Admin</h2>
+            <p class="text-muted mb-0">Xin chào, @Session["FullName"]! Thống kê được tính trực tiếp từ cơ sở dữ liệu.</p>
+        </div>
+        <span class="badge bg-dark p-2">Quản trị viên</span>
+    </div>
+    @if (TempData["Success"] != null)
+    {<div class="alert alert-success">@TempData["Success"]</div>}
+    @if (TempData["Error"] != null)
+    {<div class="alert alert-danger">@TempData["Error"]</div>}
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="text-muted">Tổng chiến dịch</div><div class="display-6">@ViewBag.TotalCampaigns</div></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="text-muted">Tài khoản</div><div class="display-6">@ViewBag.TotalUsers</div></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="text-muted">Lượt quyên góp hợp lệ</div><div class="display-6">@ViewBag.ValidDonationCount</div><small class="text-muted">Trạng thái donation = 1</small></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="text-muted">Tổng tiền hợp lệ</div><div class="h3 mt-2">@totalAmount.ToString("N0") đ</div></div></div></div>
+    </div>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between flex-wrap"><h5>Tổng tiến độ mục tiêu</h5><strong>@overallProgress%</strong></div>
+            <div class="progress" role="progressbar" aria-valuenow="@overallProgress" aria-valuemin="0" aria-valuemax="100" style="height:22px"><div class="progress-bar bg-success" style="width:@overallProgress%">@overallProgress%</div></div>
+            <div class="small text-muted mt-2">Đã nhận @totalAmount.ToString("N0") đ / tổng mục tiêu @totalTarget.ToString("N0") đ</div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3"><h4 class="mb-2">Tiến độ chiến dịch</h4>@Html.ActionLink("+ Thêm chiến dịch", "CreateCampaign", "Admin", null, new { @class = "btn btn-primary" })</div>
+    <div class="table-responsive mb-4">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark"><tr><th>Chiến dịch</th><th>Đã nhận</th><th>Mục tiêu</th><th>Tiến độ</th><th>Trạng thái</th></tr></thead>
+            <tbody>
+                @foreach (var c in campaigns)
+                {
+                    <tr><td>@c.Title</td><td>@c.RaisedAmount.ToString("N0") đ</td><td>@c.TargetAmount.ToString("N0") đ</td><td style="min-width:150px"><div class="progress"><div class="progress-bar" style="width:@c.ProgressPercent%">@c.ProgressPercent%</div></div></td><td><span class="badge @c.StatusBadgeClass">@c.StatusText</span></td></tr>
+}
+                @if (!campaigns.Any())
+                {
+                    <tr><td colspan="5" class="text-center text-muted">Chưa có chiến dịch.</td></tr>
+}
+            </tbody>
+        </table>
+    </div>
+    <h4 class="mb-3">Chức năng quản trị</h4>
+    <div class="row g-3">
+        <div class="col-md-6"><a class="card card-body h-100 text-decoration-none" href="@Url.Action("Campaigns", "Admin")"><h5>Quản lý chiến dịch</h5><span class="text-muted">Thêm, sửa, xóa và lọc chiến dịch</span></a></div>
+        <div class="col-md-6"><a class="card card-body h-100 text-decoration-none" href="@Url.Action("Donations", "Admin")"><h5>Quản lý quyên góp</h5><span class="text-muted">Tra cứu giao dịch và tổng tiền hợp lệ</span></a></div>
+    </div>
+    <div class="mt-4">@Html.ActionLink("Đăng xuất", "Logout", "Account", null, new { @class = "btn btn-outline-danger" })</div>
+</div>

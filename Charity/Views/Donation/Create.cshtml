@@ -1,0 +1,24 @@
+﻿@model Charity.Models.Donation
+@{
+    ViewBag.Title = "Quyên góp mô phỏng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var campaign = ViewBag.Campaign as Charity.Models.Campaign;
+}
+<div class="container mt-4 mb-5" style="max-width:760px">
+    <h2>Quyên góp mô phỏng</h2>
+    @if (campaign != null)
+    {
+        <div class="alert alert-info"><strong>@campaign.Title</strong><br />Mục tiêu: @campaign.TargetAmount.ToString("N0") đ<br /><small>Đây là giao dịch demo, không thực hiện chuyển tiền thật.</small></div>
+    }
+    @using (Html.BeginForm("Create", "Donation", FormMethod.Post, new { @class = "card card-body shadow-sm" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.CampaignId)
+        @Html.ValidationSummary(false, "Vui lòng kiểm tra thông tin:", new { @class = "alert alert-danger" })
+        <div class="mb-3"><label class="form-label">Số tiền (VNĐ) *</label>@Html.TextBoxFor(m => m.Amount, new { @class = "form-control", type = "number", min = "1", step = "1000", required = "required" })@Html.ValidationMessageFor(m => m.Amount, "", new { @class = "text-danger" })</div>
+        <div class="mb-3"><label class="form-label">Phương thức (mô phỏng)</label>@Html.DropDownListFor(m => m.PaymentMethod, new SelectList(new[] { "Mô phỏng", "Chuyển khoản demo", "Ví điện tử demo" }), new { @class = "form-select" })</div>
+        <div class="mb-3"><label class="form-label">Lời nhắn</label>@Html.TextAreaFor(m => m.Message, 3, 10, new { @class = "form-control", maxlength = "500", placeholder = "Gửi lời nhắn đến chiến dịch..." })</div>
+        <div class="form-check mb-3">@Html.CheckBoxFor(m => m.IsAnonymous, new { @class = "form-check-input" })<label class="form-check-label" for="IsAnonymous">Hiển thị ẩn danh</label></div>
+        <div><button type="submit" class="btn btn-primary">Xác nhận quyên góp demo</button> @Html.ActionLink("Hủy", "Details", "Campaign", new { id = Model.CampaignId }, new { @class = "btn btn-outline-secondary" })</div>
+    }
+</div>
